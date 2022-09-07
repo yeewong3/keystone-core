@@ -32,7 +32,15 @@ export function applyIdFieldDefaults(config: KeystoneConfig): KeystoneConfig['li
         `BigInt autoincrements are not supported on SQLite but they are configured at db.idField on the ${key} list`
       );
     }
-    const idField = idFieldType(listConfig.db?.idField ?? defaultIdField);
+
+    if (listConfig.isSingleton && listConfig.db?.idField) {
+      throw new Error(
+        `A singleton list cannot specify an idField, but it is configured at db.idField on the ${key} list`
+      );
+    }
+    const idFieldConfig = listConfig.db?.idField ?? defaultIdField;
+
+    const idField = idFieldType(idFieldConfig, !!listConfig.isSingleton);
 
     const fields = { id: idField, ...listConfig.fields };
     lists[key] = { ...listConfig, fields };
